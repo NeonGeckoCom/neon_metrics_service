@@ -19,6 +19,7 @@
 
 import os
 import time
+import json
 
 from pprint import pformat
 from os import makedirs
@@ -62,19 +63,24 @@ def log_metric(logs_dir: str = None, **kwargs):
 
         try:
             makedirs(upload_dir)
-            # Write status
-            with open(join(upload_dir, "status.log"), "a+") as status_log:
-                status_log.write(kwargs.get("status"))
-                status_log.write("\n")
+            # Write startup log
+            if kwargs.get("startup"):
+                with open(join(upload_dir, "startup.log"), "a+") as startup_log:
+                    startup_log.write(kwargs.get("startup"))
+                    startup_log.write("\n")
             # Write configurations
-            for key, val in kwargs.get("configurations").items():
-                try:
-                    with open(join(upload_dir, key), "a+") as file:
-                        file.write(pformat(val))
-                        file.write("\n")
-                except Exception as e:
-                    LOG.error(e)
-                    LOG.debug(kwargs.get("configurations"))
+            if kwargs.get("configurations"):
+                configurations = kwargs["configurations"]
+                if isinstance(configurations, str):
+                    configurations = json.loads(kwargs["configurations"])
+                for key, val in configurations.items():
+                    try:
+                        with open(join(upload_dir, key), "a+") as file:
+                            file.write(pformat(val))
+                            file.write("\n")
+                    except Exception as e:
+                        LOG.error(e)
+                        LOG.debug(kwargs.get("configurations"))
             # Write transcripts
             if kwargs.get("transcripts"):
                 try:
@@ -86,7 +92,10 @@ def log_metric(logs_dir: str = None, **kwargs):
                     LOG.debug(kwargs.get("transcripts"))
             # Write logs
             if kwargs.get("logs"):
-                for key, val in kwargs.get("logs").items():
+                logs = kwargs["logs"]
+                if isinstance(logs, str):
+                    logs = json.loads(logs)
+                for key, val in logs:
                     try:
                         with open(join(upload_dir, f"{key}.log"), "a+") as file:
                             file.write(val)
