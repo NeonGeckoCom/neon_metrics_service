@@ -95,7 +95,7 @@ def log_metric(logs_dir: str = None, **kwargs):
                 logs = kwargs["logs"]
                 if isinstance(logs, str):
                     logs = json.loads(logs)
-                for key, val in logs:
+                for key, val in logs.items():
                     try:
                         with open(join(upload_dir, f"{key}.log"), "a+") as file:
                             file.write(val)
