@@ -12,9 +12,7 @@ RUN apt-get update && \
 
 WORKDIR /config
 
-ENV NEON_MQ_PROXY_CONFIG_PATH /config/config.json
+ENV NEON_CONFIG_PATH /config
 ENV NEON_METRICS_DIR /metrics
-RUN mkdir ~/.config && \
-    ln -s /config ~/.config/neon
 
 CMD ["neon_metrics_service"]

@@ -1,1 +1,2 @@
-neon_mq_connector==0.1.2
+# TODO: Update to non-alpha versions
+neon_mq_connector~=0.2.1a0
