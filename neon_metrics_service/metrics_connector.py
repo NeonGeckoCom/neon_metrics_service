@@ -127,7 +127,7 @@ class NeonMetricsConnector(MQConnector):
         self.stop_consumers()
         self.run()
 
-    def pre_run(self):
+    def pre_run(self, **kwargs):
         self.register_consumer("neon_connections_consumer", self.vhost, 'neon_connections_input',
                                self.handle_new_connection, auto_ack=False)
         self.register_consumer("neon_metrics_consumer", self.vhost, 'neon_metrics_input',
