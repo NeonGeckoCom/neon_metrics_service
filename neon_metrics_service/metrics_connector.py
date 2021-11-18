@@ -19,17 +19,18 @@
 
 import pika.channel
 
+from typing import Optional
 from neon_utils import LOG
 from neon_utils.socket_utils import b64_to_dict, dict_to_b64
+from neon_mq_connector.connector import MQConnector
 
 from neon_metrics_service.metrics_utils import log_metric, log_client_connection
-from neon_mq_connector.connector import MQConnector, ConsumerThread
 
 
 class NeonMetricsConnector(MQConnector):
     """Adapter for establishing connection between Neon API and MQ broker"""
 
-    def __init__(self, config: dict, service_name: str):
+    def __init__(self, config: Optional[dict], service_name: str):
         """
             Additionally accepts message bus connection properties
 
@@ -58,16 +59,16 @@ class NeonMetricsConnector(MQConnector):
             return {"success": False}
 
     def handle_metric(self,
-                              channel: pika.channel.Channel,
-                              method: pika.spec.Basic.Deliver,
-                              properties: pika.spec.BasicProperties,
-                              body: bytes):
+                      channel: pika.channel.Channel,
+                      method: pika.spec.Basic.Deliver,
+                      _: pika.spec.BasicProperties,
+                      body: bytes):
         """
             Handles input requests from MQ to Neon API
 
             :param channel: MQ channel object (pika.channel.Channel)
             :param method: MQ return method (pika.spec.Basic.Deliver)
-            :param properties: MQ properties (pika.spec.BasicProperties)
+            :param _: MQ properties (pika.spec.BasicProperties)
             :param body: request body (bytes)
         """
         message_id = None
@@ -97,14 +98,14 @@ class NeonMetricsConnector(MQConnector):
     def handle_new_connection(self,
                               channel: pika.channel.Channel,
                               method: pika.spec.Basic.Deliver,
-                              properties: pika.spec.BasicProperties,
+                              _: pika.spec.BasicProperties,
                               body: bytes):
         """
             Handles input requests from MQ to Neon API
 
             :param channel: MQ channel object (pika.channel.Channel)
             :param method: MQ return method (pika.spec.Basic.Deliver)
-            :param properties: MQ properties (pika.spec.BasicProperties)
+            :param _: MQ properties (pika.spec.BasicProperties)
             :param body: request body (bytes)
         """
         message_id = None
@@ -121,14 +122,13 @@ class NeonMetricsConnector(MQConnector):
             LOG.error(e)
 
     def handle_error(self, thread, exception):
-        LOG.error(exception)
+        LOG.error(f"{exception} in {thread}")
         LOG.info(f"Restarting Consumers")
         self.stop_consumers()
         self.run()
 
-    def run(self):
+    def pre_run(self, **kwargs):
         self.register_consumer("neon_connections_consumer", self.vhost, 'neon_connections_input',
                                self.handle_new_connection, auto_ack=False)
         self.register_consumer("neon_metrics_consumer", self.vhost, 'neon_metrics_input',
                                self.handle_metric, auto_ack=False)
-        self.run_consumers()

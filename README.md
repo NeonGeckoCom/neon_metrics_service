@@ -18,9 +18,12 @@ may be included in the request.
 No response is expected.
 
 ## Docker Configuration
-When running this as a docker container, the path to configuration files should be mounted to `/config`.
+When running this as a docker container, the path to configuration files should be mounted to `/config` and the path to
+save reported metrics mounted to `/metrics`. This container expects `mq_config.json` to contain service `neon_metrics_connector`.
 
-For example, if your configuration resides in `~/.config`:
+For example, if your configuration resides in `~/.config` and you want metrics saved to `~/neon_metrics`:
 ```shell
-docker run -v /home/$USER/.config:/config -v /home/neon_metrics:/metrics neon_metrics_service
+export CONFIG_PATH="/home/${USER}/.config"
+export METRIC_PATH="/home/${USER}/neon_metrics"
+docker run -v ${CONFIG_PATH}:/config -v ${METRIC_PATH}:/metrics neon_metrics_service
 ```
