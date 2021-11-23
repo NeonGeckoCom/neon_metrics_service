@@ -1,0 +1,2 @@
+neon_utils~=0.13
+neon_mq_connector~=0.3
