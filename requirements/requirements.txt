@@ -1,2 +1,3 @@
-neon_utils~=0.13
+neon_utils~=0.14.3a2
+# TODO: Update to release version
 neon_mq_connector~=0.3
