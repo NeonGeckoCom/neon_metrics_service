@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-slim
 
 ADD . /neon_metrics_service
 WORKDIR /neon_metrics_service
