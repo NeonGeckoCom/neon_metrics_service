@@ -1,2 +1,2 @@
 ovos-utils~=0.0,>=0.0.32
-neon_mq_connector~=0.6,>=0.6.1a6
+neon_mq_connector~=0.6,>=0.6.1a7
