@@ -33,9 +33,9 @@ from neon_metrics_service.metrics_connector import NeonMetricsConnector
 
 def run_mq_handler():
     """
-    Start the CouponConnector service
+    Start the Metrics service
     """
-    connector = NeonMetricsConnector(config=None, service_name="neon_metrics_connector")
+    connector = NeonMetricsConnector(service_name="neon_metrics_connector")
     connector.run()
     wait_for_exit_signal()
 
