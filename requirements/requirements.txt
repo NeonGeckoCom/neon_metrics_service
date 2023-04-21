@@ -1,2 +1,2 @@
-neon_utils~=0.16
+neon_utils[network]~=1.0
 neon_mq_connector~=0.3
