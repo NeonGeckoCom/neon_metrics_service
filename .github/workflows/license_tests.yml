@@ -9,4 +9,4 @@ jobs:
   license_tests:
     uses: neongeckocom/.github/.github/workflows/license_tests.yml@FEAT_ConfigureLicenseTests
     with:
-      packages-exclude: '^(neon-metrics-service).*'
+      packages-exclude: '^(neon-metrics-service|tqdm).*'
