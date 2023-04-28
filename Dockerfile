@@ -1,18 +1,17 @@
-FROM python:3.8-slim
+FROM python:3.10-slim
 
-ADD . /neon_metrics_service
-WORKDIR /neon_metrics_service
+ENV XDG_CONFIG_HOME /config
+COPY docker_overlay/ /
+
 RUN apt-get update && \
     apt-get install -y \
     gcc \
     python3  \
     python3-dev  \
-    && pip install wheel  \
-    && pip install .
+    && pip install wheel
 
-WORKDIR /config
-
-ENV NEON_CONFIG_PATH /config
-ENV NEON_METRICS_DIR /metrics
+ADD . /neon_api_proxy
+WORKDIR /neon_api_proxy
+RUN pip install .
 
 CMD ["neon_metrics_service"]
