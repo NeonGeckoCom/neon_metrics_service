@@ -27,8 +27,11 @@
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from ovos_utils import wait_for_exit_signal
+from ovos_utils.log import init_service_logger
 
 from neon_metrics_service.metrics_connector import NeonMetricsConnector
+
+init_service_logger("neon-metrics-service")
 
 
 def run_mq_handler():
