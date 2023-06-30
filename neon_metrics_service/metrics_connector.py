@@ -50,7 +50,13 @@ class NeonMetricsConnector(MQConnector):
 
     @staticmethod
     def handle_record_metric(**kwargs):
+        """
+        Handle an arbitrary metric to log
+        :param kwargs: data to log
+        :returns: dict containing `success` key
+        """
         try:
+            LOG.info(f"New metric: {kwargs}")
             log_metric(**kwargs)
             return {"success": True}
         except Exception as e:
@@ -58,8 +64,14 @@ class NeonMetricsConnector(MQConnector):
             return {"success": False}
 
     @staticmethod
-    def handle_record_connection(**kwargs):
+    def handle_record_connection(**kwargs) -> dict:
+        """
+        Handle a new connection
+        :param kwargs: data to log
+        :returns: dict containing `success` key
+        """
         try:
+            LOG.info(f"New connection: {kwargs}")
             log_client_connection(**kwargs)
             return {"success": True}
         except Exception as e:
@@ -72,12 +84,12 @@ class NeonMetricsConnector(MQConnector):
                       _: pika.spec.BasicProperties,
                       body: bytes):
         """
-            Handles input requests from MQ to Neon API
+        Handles input requests from MQ to Neon API
 
-            :param channel: MQ channel object (pika.channel.Channel)
-            :param method: MQ return method (pika.spec.Basic.Deliver)
-            :param _: MQ properties (pika.spec.BasicProperties)
-            :param body: request body (bytes)
+        :param channel: MQ channel object (pika.channel.Channel)
+        :param method: MQ return method (pika.spec.Basic.Deliver)
+        :param _: MQ properties (pika.spec.BasicProperties)
+        :param body: request body (bytes)
         """
         message_id = None
         try:
