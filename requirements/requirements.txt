@@ -1,2 +1,2 @@
-neon_utils~=0.16
-neon_mq_connector~=0.3
+ovos-utils~=0.0.32
+neon_mq_connector~=0.7

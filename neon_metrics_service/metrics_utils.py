@@ -33,18 +33,33 @@ import json
 from pprint import pformat
 from os import makedirs
 from os.path import join, expanduser, isdir
-from neon_utils.logger import LOG
+from ovos_utils.log import LOG
 
-LOG_DIR = expanduser(os.getenv("NEON_METRICS_DIR", "~/.local/share/neon/metrics"))
-if not isdir(LOG_DIR):
-    LOG.info(f"Creating metrics logging directory at: {LOG_DIR}")
-    makedirs(LOG_DIR)
+_LOG_DIR = None
+
+
+def get_log_dir():
+    global _LOG_DIR
+    if not _LOG_DIR:
+        if os.getenv("NEON_METRICS_DIR"):
+            LOG.info(f"Got log directory from env: "
+                     f"{os.getenv('NEON_METRICS_DIR')}")
+            _LOG_DIR = expanduser(os.getenv("NEON_METRICS_DIR"))
+        else:
+            from ovos_utils.xdg_utils import xdg_data_home
+            LOG.info(f"Using default XDG path: {xdg_data_home()}")
+            _LOG_DIR = join(xdg_data_home(), "neon", "metrics")
+    if not isdir(_LOG_DIR):
+        LOG.info(f"Creating metrics logging directory at: {_LOG_DIR}")
+        makedirs(_LOG_DIR)
+    return _LOG_DIR
 
 
 def log_client_connection(log_file: str = None, **kwargs):
-    log_file = expanduser(log_file or join(LOG_DIR, "connections.log"))
+    log_file = expanduser(log_file or join(get_log_dir(), "connections.log"))
     with open(log_file, "a+") as log:
-        log.write(f'{kwargs["time"]},{kwargs["ver"]},{kwargs["name"]},{kwargs["host"]}\n')
+        log.write(f'{kwargs["time"]},{kwargs["ver"]},{kwargs["name"]},'
+                  f'{kwargs["host"]}\n')
 
 
 def log_metric(logs_dir: str = None, **kwargs):
@@ -53,7 +68,7 @@ def log_metric(logs_dir: str = None, **kwargs):
                           "converse": "converse.log",
                           }
     log_file = metric_to_log_name.get(kwargs.get("name", ""), "metrics.log")
-    logs_dir = expanduser(logs_dir or LOG_DIR)
+    logs_dir = expanduser(logs_dir or get_log_dir())
     log_file = join(logs_dir, log_file)
 
     if not isdir(logs_dir):
@@ -63,8 +78,10 @@ def log_metric(logs_dir: str = None, **kwargs):
     if kwargs.get("name") == "failed-intent":
         LOG.info("Intent Failure reported!")
         with open(log_file, "a+") as log:
-            log.write(f'{time.strftime("%Y-%m-%d %H:%M:%S")},{kwargs.get("device")},{kwargs.get("utterance")}\n')
-    elif kwargs.get("name") == "diagnostics":  # TODO: This should probably have it's own handler DM
+            log.write(f'{time.strftime("%Y-%m-%d %H:%M:%S")},'
+                      f'{kwargs.get("device")},{kwargs.get("utterance")}\n')
+    # TODO: This should probably have it's own handler DM
+    elif kwargs.get("name") == "diagnostics":
         LOG.info("Diagnostics Uploaded!")
         host = kwargs.get("host")
         uploaded = time.strftime("%Y-%m-%d_%H-%M-%S")
@@ -93,7 +110,8 @@ def log_metric(logs_dir: str = None, **kwargs):
             # Write transcripts
             if kwargs.get("transcripts"):
                 try:
-                    with open(join(upload_dir, "transcripts.csv"), "a+") as transcripts:
+                    with open(join(upload_dir,
+                                   "transcripts.csv"), "a+") as transcripts:
                         transcripts.write(kwargs.get("transcripts"))
                         transcripts.write("\n")
                 except Exception as e:
@@ -116,7 +134,8 @@ def log_metric(logs_dir: str = None, **kwargs):
             LOG.error(e)
     elif kwargs.get("name") == "converse":
         with open(log_file, "a+") as log:
-            log.write(f'{time.strftime("%Y-%m-%d %H:%M:%S")},{kwargs.get("skill")},{kwargs.get("time")}\n')
+            log.write(f'{time.strftime("%Y-%m-%d %H:%M:%S")},'
+                      f'{kwargs.get("skill")},{kwargs.get("time")}\n')
     else:
         LOG.info("other metric reported")
         with open(log_file, "a+") as log:

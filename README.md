@@ -18,12 +18,22 @@ may be included in the request.
 No response is expected.
 
 ## Docker Configuration
-When running this as a docker container, the path to configuration files should be mounted to `/config` and the path to
-save reported metrics mounted to `/metrics`. This container expects `mq_config.json` to contain service `neon_metrics_connector`.
+When running this as a docker container, the `XDG_CONFIG_HOME` envvar is set to `/config`.
+A configuration file at `/config/neon/diana.yaml` is required and should look like:
+```yaml
+MQ:
+  port: <MQ Port>
+  server: <MQ Hostname or IP>
+  users:
+    neon_metrics_connector:
+      password: <neon_metrics user's password>
+      user: neon_metrics
+```
 
-For example, if your configuration resides in `~/.config` and you want metrics saved to `~/neon_metrics`:
+For example, if your configuration resides in `~/.config`:
 ```shell
 export CONFIG_PATH="/home/${USER}/.config"
-export METRIC_PATH="/home/${USER}/neon_metrics"
-docker run -v ${CONFIG_PATH}:/config -v ${METRIC_PATH}:/metrics neon_metrics_service
+export DATA_PATH="/home/${USER}/metrics"
+docker run -v ${CONFIG_PATH}:/config -v ${DATA_PATH}:/data neon_metrics_connector
 ```
+> Note: If connecting to a local MQ server, you may need to specify `--network host`
