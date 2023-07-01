@@ -6,6 +6,7 @@ LABEL vendor=neon.ai \
 ENV OVOS_CONFIG_BASE_FOLDER neon
 ENV OVOS_CONFIG_FILENAME diana.yaml
 ENV XDG_CONFIG_HOME /config
+ENV XDG_DATA_HOME /data
 COPY docker_overlay/ /
 
 RUN apt-get update && \
