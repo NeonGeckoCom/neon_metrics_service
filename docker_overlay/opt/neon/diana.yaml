@@ -5,10 +5,13 @@ logs:
       - pika
     warning:
       - filelock
-    info: []
+      - watchdog
+      - httpcore
+    info:
+      - asyncio
     debug: []
 MQ:
-  server: api.neon.ai
+  server: neon-rabbitmq
   port: 5672
   users:
     mq_handler:
