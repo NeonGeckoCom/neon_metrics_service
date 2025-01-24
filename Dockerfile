@@ -3,9 +3,10 @@ FROM python:3.10-slim
 LABEL vendor=neon.ai \
     ai.neon.name="neon-metrics-service"
 
-ENV OVOS_CONFIG_BASE_FOLDER neon
-ENV OVOS_CONFIG_FILENAME diana.yaml
-ENV XDG_CONFIG_HOME /config
+ENV OVOS_CONFIG_BASE_FOLDER=neon
+ENV OVOS_CONFIG_FILENAME=diana.yaml
+ENV OVOS_DEFAULT_CONFIG=/opt/neon/diana.yaml
+ENV XDG_CONFIG_HOME=/config
 ENV XDG_DATA_HOME /data
 COPY docker_overlay/ /
 
@@ -16,8 +17,8 @@ RUN apt-get update && \
     python3-dev  \
     && pip install wheel
 
-ADD . /neon_api_proxy
-WORKDIR /neon_api_proxy
+ADD . /neon_metrics_service
+WORKDIR /neon_metrics_service
 RUN pip install .
 
 CMD ["neon_metrics_service"]
