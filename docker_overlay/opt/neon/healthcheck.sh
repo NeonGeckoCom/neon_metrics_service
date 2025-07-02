@@ -1,9 +1,8 @@
-# NEON AI (TM) SOFTWARE, Software Development Kit & Application Framework
+#!/bin/bash
+# NEON AI (TM) SOFTWARE, Software Development Kit & Application Development System
 # All trademark and other rights reserved by their respective owners
 # Copyright 2008-2025 Neongecko.com Inc.
-# Contributors: Daniel McKnight, Guy Daniels, Elon Gasper, Richard Leeds,
-# Regina Bloomstine, Casimiro Ferreira, Andrii Pernatii, Kirill Hrymailo
-# BSD-3 License
+# BSD-3
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 # 1. Redistributions of source code must retain the above copyright notice,
@@ -26,32 +25,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from os import environ
-from ovos_utils import wait_for_exit_signal
-from ovos_utils.log import init_service_logger
-from neon_utils.process_utils import start_health_check_server
-
-from neon_metrics_service.metrics_connector import NeonMetricsConnector
-
-init_service_logger("neon-metrics-service")
-
-
-def run_mq_handler():
-    """
-    Start the Metrics service
-    """
-    connector = NeonMetricsConnector(service_name="neon_metrics_connector")
-    if status_port := environ.get("HEALTHCHECK_PORT"):
-        start_health_check_server(
-            connector.status, int(status_port), connector.check_health
-        )
-    connector.run()
-    wait_for_exit_signal()
-
-
-def main():
-    run_mq_handler()
-
-
-if __name__ == "__main__":
-    main()
+port="${HEALTHCHECK_PORT:-8080}"
+# Perform the health check using curl
+resp_content=$(curl -s http://localhost:${port}/status)
+status=$(echo "${resp_content}" | jq -r '.status')
+if [ "${status}" == "Ready" ]; then
+  exit 0  # Success
+else
+  echo "Health check failed with response: ${resp_content}" >&2
+  exit 1  # Failure
+fi

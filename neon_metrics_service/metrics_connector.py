@@ -26,6 +26,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE,  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from ovos_utils.process_utils import ProcessStatus
 import pika.channel
 
 from typing import Optional
@@ -46,7 +47,24 @@ class NeonMetricsConnector(MQConnector):
         :param service_name: name of the service instance
         """
         super().__init__(config, service_name)
+        self.status = ProcessStatus(self.service_name)
+        self.status.set_alive()
         self.vhost = '/neon_metrics'
+
+    def check_health(self) -> bool:
+        if not MQConnector.check_health(self):
+            self.status.set_error("MQConnector health check failed")
+            return False
+        return self.status.check_ready
+
+    def stop(self):
+        self.status.set_stopping()
+        MQConnector.stop(self)
+
+    def run(self):
+        MQConnector.run(self)
+        LOG.info("Metrics Service is running")
+        self.status.set_ready()
 
     @staticmethod
     def handle_record_metric(**kwargs):
